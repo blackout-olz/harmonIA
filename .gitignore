@@ -1,0 +1,16 @@
+# Ambientes Virtuais
+.venv/
+venv/
+ENV/
+
+# Python / Pycache
+__pycache__/
+*.py[cod]
+
+# Variáveis de ambiente (chaves de API)
+.env
+
+# Arquivos do sistema e IDEs
+.DS_Store
+.vscode/
+.idea/
