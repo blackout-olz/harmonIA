@@ -1,5 +1,7 @@
 import streamlit as st
 from src.agent import criar_agente
+from src.rag.policy_retriever import get_policy_retriever
+from src.tools.database import init_db
 
 st.set_page_config(
     page_title="HarmonIA — Empório da Música",
@@ -10,6 +12,13 @@ st.set_page_config(
 st.title("🎵 HarmonIA")
 st.subheader("Assistente Virtual da Empório da Música")
 st.markdown("---")
+
+# Pré-carrega o banco SQLite em memória e a base RAG para eliminar latência na 1ª consulta
+if "warmed_up" not in st.session_state:
+    with st.spinner("Inicializando sistemas..."):
+        init_db()
+        get_policy_retriever()
+        st.session_state.warmed_up = True
 
 # Mantém a mesma instância do agente na sessão do navegador
 if "agent" not in st.session_state:

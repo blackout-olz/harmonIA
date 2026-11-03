@@ -1,5 +1,16 @@
 import sys
-from src.agent import executar_agente, criar_agente
+from src.agent import criar_agente, executar_agente
+from src.rag.policy_retriever import get_policy_retriever
+from src.tools.database import init_db
+
+
+def warm_up():
+    """Pré-carrega o banco de dados e o índice FAISS do RAG para evitar frio na 1ª mensagem."""
+    print("⚡ Inicializando sistemas (Banco de Dados e RAG)...", end=" ", flush=True)
+    init_db()
+    get_policy_retriever()
+    print("Pronto!\n")
+
 
 def modo_interativo():
     print("=" * 60)
@@ -7,7 +18,7 @@ def modo_interativo():
     print("Digite sua pergunta abaixo. Para sair, digite 'sair' ou 'exit'.")
     print("=" * 60 + "\n")
 
-    # Instancia o agente em modo verbose se desejar ver o raciocínio e ferramentas
+    # Instancia o agente em modo verbose para exibir raciocínio e ferramentas no terminal
     agente = criar_agente(verbose=True)
 
     while True:
@@ -17,7 +28,10 @@ def modo_interativo():
                 continue
 
             if user_input.lower() in ["sair", "exit", "quit"]:
-                print("\nHarmonIA: Obrigado por consultar a Empório da Música! Até logo.")
+                print(
+                    "\nHarmonIA: Obrigado por consultar a Empório da Música! Até"
+                    " logo."
+                )
                 break
 
             resposta = agente.invoke({"input": user_input})
@@ -29,8 +43,11 @@ def modo_interativo():
         except Exception as e:
             print(f"\n[Erro]: {str(e)}")
 
+
 if __name__ == "__main__":
-    # Se o usuário passar a pergunta como argumento: python main.py "Qual o preço do violão?"
+    warm_up()
+
+    # Execução via linha de comando: python main.py "Qual o preço do violão?"
     if len(sys.argv) > 1:
         pergunta = " ".join(sys.argv[1:])
         print(f"Pergunta: {pergunta}\n")
