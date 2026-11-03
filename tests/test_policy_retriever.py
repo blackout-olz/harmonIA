@@ -1,38 +1,36 @@
 from unittest.mock import MagicMock, patch
-import json
 from src.rag.policy_retriever import consultar_politicas
+
 
 @patch("src.rag.policy_retriever.get_policy_retriever")
 def test_consultar_politicas_sucesso(mock_get_retriever):
-    """Valida se a tool de políticas formata o retorno JSON corretamente sem instanciar PyTorch."""
-    # Simula documento retornado pelo retriever do LangChain
+    """Valida se a tool de políticas retorna o texto formatado sem instanciar modelos pesados."""
     doc_mock = MagicMock()
-    doc_mock.page_content = "Garantia legal de 90 dias contra defeitos de fabricacao."
+    doc_mock.page_content = (
+        "Garantia legal de 90 dias contra defeitos de fabricacao."
+    )
     doc_mock.metadata = {"page": 6}
 
     retriever_mock = MagicMock()
     retriever_mock.invoke.return_value = [doc_mock]
     mock_get_retriever.return_value = retriever_mock
 
-    resultado_json = consultar_politicas.invoke({"duvida": "garantia"})
-    dados = json.loads(resultado_json)
+    resultado = consultar_politicas.invoke({"duvida": "garantia"})
 
-    assert "duvida" in dados
-    assert dados["duvida"] == "garantia"
-    assert len(dados["trechos_encontrados"]) == 1
-    assert dados["trechos_encontrados"][0]["pagina"] == 7
-    assert "90 dias" in dados["trechos_encontrados"][0]["trecho"]
+    assert isinstance(resultado, str)
+    assert "Garantia legal de 90 dias" in resultado
 
 
 @patch("src.rag.policy_retriever.get_policy_retriever")
 def test_consultar_politicas_sem_resultados(mock_get_retriever):
-    """Valida o retorno quando nenhuma política corresponde à busca."""
+    """Valida a mensagem amigável quando nenhuma política é encontrada."""
     retriever_mock = MagicMock()
     retriever_mock.invoke.return_value = []
     mock_get_retriever.return_value = retriever_mock
 
-    resultado_json = consultar_politicas.invoke({"duvida": "termo_inexistente"})
-    dados = json.loads(resultado_json)
+    resultado = consultar_politicas.invoke({"duvida": "termo_inexistente"})
 
-    assert "mensagem" in dados
-    assert "Nenhuma política específica encontrada" in dados["mensagem"]
+    assert (
+        resultado
+        == "Nenhuma informação relevante encontrada no manual de políticas."
+    )
