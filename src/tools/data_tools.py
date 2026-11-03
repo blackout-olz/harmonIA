@@ -55,7 +55,7 @@ def buscar_produtos(
     rows = cursor.fetchall()
 
     if not rows:
-        return json.dumps({"mensagem": "Nenhum produto encontrado com os critérios fornecidos."})
+        return json.dumps({"mensagem": "Nenhum produto encontrado com os critérios fornecidos."}, ensure_ascii=False)
 
     produtos = []
     for r in rows:
@@ -106,13 +106,12 @@ def consultar_status_pedido(identificador: str) -> str:
     pedidos_rows = cursor.fetchall()
 
     if not pedidos_rows:
-        return json.dumps({"mensagem": f"Nenhum pedido encontrado para o identificador '{identificador}'."})
+        return json.dumps({"mensagem": f"Nenhum pedido encontrado para o identificador '{identificador}'."}, ensure_ascii=False)
 
     resultado = []
     for ped in pedidos_rows:
         order_id = ped[0]
         
-        # Correção: preço unitário vindo de p.price_brl
         query_items = """
             SELECT p.name, oi.quantity, p.price_brl
             FROM order_items oi
